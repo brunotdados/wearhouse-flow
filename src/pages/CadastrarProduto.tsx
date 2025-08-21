@@ -8,13 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Save, Send, Package, AlertCircle, CheckCircle } from 'lucide-react';
+import { Save, Send, Package, AlertCircle, CheckCircle, Upload, X, ImageIcon } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface ProdutoForm {
   nome_produto: string;
   descricao_detalhada: string;
   imagens_urls: string;
+  imagens_files: File[];
   preco_venda: string;
   preco_promocional: string;
   preco_custo: string;
@@ -43,6 +44,7 @@ const CadastrarProduto = () => {
     nome_produto: '',
     descricao_detalhada: '',
     imagens_urls: '',
+    imagens_files: [],
     preco_venda: '',
     preco_promocional: '',
     preco_custo: '',
@@ -82,8 +84,30 @@ const CadastrarProduto = () => {
     }
   }, [formData.categoria, formData.nome_produto, formData.opcao2_valor, formData.opcao1_valor]);
 
-  const handleInputChange = (field: keyof ProdutoForm, value: string | boolean) => {
+  const handleInputChange = (field: keyof ProdutoForm, value: string | boolean | File[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const jpgFiles = files.filter(file => 
+      file.type === 'image/jpeg' || file.type === 'image/jpg'
+    );
+    
+    if (jpgFiles.length !== files.length) {
+      toast({
+        title: "Formato não suportado",
+        description: "Apenas arquivos JPG são aceitos",
+        variant: "destructive",
+      });
+    }
+    
+    handleInputChange('imagens_files', jpgFiles);
+  };
+
+  const removeImage = (indexToRemove: number) => {
+    const newFiles = formData.imagens_files.filter((_, index) => index !== indexToRemove);
+    handleInputChange('imagens_files', newFiles);
   };
 
   const validateForm = () => {
@@ -196,6 +220,7 @@ const CadastrarProduto = () => {
         nome_produto: '',
         descricao_detalhada: '',
         imagens_urls: '',
+        imagens_files: [],
         preco_venda: '',
         preco_promocional: '',
         preco_custo: '',
@@ -328,14 +353,56 @@ const CadastrarProduto = () => {
                   </div>
 
                   <div className="md:col-span-2">
-                    <Label htmlFor="imagens_urls">URLs das Imagens</Label>
-                    <Input
-                      id="imagens_urls"
-                      value={formData.imagens_urls}
-                      onChange={(e) => handleInputChange('imagens_urls', e.target.value)}
-                      placeholder="https://exemplo.com/img1.jpg; https://exemplo.com/img2.jpg"
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">Separe múltiplas URLs com ponto e vírgula (;)</p>
+                    <Label htmlFor="imagens_files">Imagens do Produto (JPG)</Label>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center w-full">
+                        <label htmlFor="imagens_files" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer bg-card hover:bg-muted/50 transition-colors">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-8 h-8 mb-3 text-muted-foreground" />
+                            <p className="mb-2 text-sm text-muted-foreground">
+                              <span className="font-semibold">Clique para adicionar</span> ou arraste as imagens
+                            </p>
+                            <p className="text-xs text-muted-foreground">Apenas arquivos JPG (máximo 10 arquivos)</p>
+                          </div>
+                          <input
+                            id="imagens_files"
+                            type="file"
+                            multiple
+                            accept=".jpg,.jpeg,image/jpeg"
+                            onChange={handleImageUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                      
+                      {/* Preview das imagens */}
+                      {formData.imagens_files.length > 0 && (
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium">Imagens selecionadas ({formData.imagens_files.length}):</p>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {formData.imagens_files.map((file, index) => (
+                              <div key={index} className="relative group">
+                                <div className="aspect-square bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                                  <img
+                                    src={URL.createObjectURL(file)}
+                                    alt={`Preview ${index + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(index)}
+                                  className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                                <p className="text-xs text-muted-foreground mt-1 truncate">{file.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div>
