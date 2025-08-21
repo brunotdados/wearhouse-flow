@@ -318,12 +318,14 @@ const CadastrarProduto = () => {
                         <SelectValue placeholder="Selecione a categoria" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="conjunto-calca">Conjunto Calça</SelectItem>
+                        <SelectItem value="conjunto-shorts">Conjunto Shorts</SelectItem>
+                        <SelectItem value="macaquitos">Macaquitos</SelectItem>
+                        <SelectItem value="macacao">Macacão</SelectItem>
                         <SelectItem value="camisetas">Camisetas</SelectItem>
-                        <SelectItem value="leggings">Leggings</SelectItem>
-                        <SelectItem value="tops">Tops</SelectItem>
                         <SelectItem value="shorts">Shorts</SelectItem>
-                        <SelectItem value="casacos">Casacos</SelectItem>
-                        <SelectItem value="acessorios">Acessórios</SelectItem>
+                        <SelectItem value="top">Top</SelectItem>
+                        <SelectItem value="legging">Legging</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
