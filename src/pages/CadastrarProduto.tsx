@@ -69,7 +69,7 @@ const CadastrarProduto = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState('https://n8n.perronifitwear.cloud/webhook/produtos');
+  const [webhookUrl, setWebhookUrl] = useState('https://n8n.perronifitwear.cloud/webhook-test/produtos');
 
 
   // Gerar SKU automaticamente
