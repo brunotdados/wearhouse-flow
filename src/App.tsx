@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
 import Layout from "./components/Layout";
-import Dashboard from "./pages/Dashboard";
+#import Dashboard from "./pages/Dashboard";
 import CadastrarProduto from "./pages/CadastrarProduto";
-import Produtos from "./pages/Produtos";
-import NotFound from "./pages/NotFound";
+#import Produtos from "./pages/Produtos";
+#import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
