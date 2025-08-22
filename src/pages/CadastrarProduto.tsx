@@ -162,13 +162,13 @@ const CadastrarProduto = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        mode: 'no-cors',
         body: JSON.stringify({
           ...dadosProduto,
           timestamp: new Date().toISOString(),
           source: 'perronifitwear-system'
         }),
       });
+
 
       toast({
         title: "Dados enviados para n8n",
