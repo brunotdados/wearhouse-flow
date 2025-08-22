@@ -67,6 +67,7 @@ const CadastrarProduto = () => {
     opcao2_nome: 'Cor',
     opcao2_valor: '',
   });
+  const [produtosPendentes, setProdutosPendentes] = useState<ProdutoForm[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState('https://n8n.perronifitwear.cloud/webhook-test/produtos');
@@ -209,12 +210,14 @@ const CadastrarProduto = () => {
       localStorage.setItem('produtos', JSON.stringify(produtosSalvos));
 
       // Enviar para n8n
-      await enviarParaN8n(dadosProduto);
-
+      // Adicionar na lista de produtos pendentes
+      setProdutosPendentes(prev => [...prev, dadosProduto]);
+      
       toast({
-        title: "Produto cadastrado!",
-        description: `${formData.nome_produto} foi cadastrado com sucesso`,
+        title: "Produto adicionado",
+        description: `${formData.nome_produto} foi adicionado à lista para envio posterior.`,
       });
+
 
       // Reset do formulário
       setFormData({
@@ -676,6 +679,47 @@ const CadastrarProduto = () => {
                 <Send className="h-4 w-4 mr-2" />
                 Reenviar ao n8n
               </Button>
+
+              <Button 
+                type="button"
+                variant="secondary"
+                onClick={async () => {
+                  if (produtosPendentes.length === 0) {
+                    toast({ title: "Nenhum produto pendente", description: "Cadastre ao menos um produto antes de enviar.", variant: "destructive" });
+                    return;
+                  }
+              
+                  setIsLoading(true);
+                  try {
+                    const response = await fetch(webhookUrl, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        produtos: produtosPendentes,
+                        timestamp: new Date().toISOString(),
+                        source: 'perronifitwear-system'
+                      }),
+                    });
+              
+                    toast({
+                      title: "Produtos enviados",
+                      description: `${produtosPendentes.length} produtos foram enviados ao n8n com sucesso.`,
+                    });
+              
+                    setProdutosPendentes([]); // limpa a lista após envio
+                  } catch (err) {
+                    toast({
+                      title: "Erro ao enviar",
+                      description: "Ocorreu um erro ao enviar os produtos ao n8n.",
+                      variant: "destructive",
+                    });
+                  }
+                  setIsLoading(false);
+                }}
+              >
+                Enviar produtos para o n8n
+              </Button>
+
             </div>
           </form>
         </div>
@@ -746,6 +790,25 @@ const CadastrarProduto = () => {
                     <span className="font-medium">R$ {parseFloat(formData.preco_venda || '0').toFixed(2)}</span>
                   </div>
                 )}
+                {/* Lista de Produtos Pendentes */}
+                {produtosPendentes.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Produtos Pendentes</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {produtosPendentes.map((produto, index) => (
+                        <div key={index} className="border-b pb-2">
+                          <p className="font-medium text-sm">{produto.nome_produto}</p>
+                          <p className="text-xs text-muted-foreground">Categoria: {produto.categoria}</p>
+                          <p className="text-xs text-muted-foreground">Cor: {produto.opcao2_valor} | Tamanho: {produto.opcao1_valor}</p>
+                          <p className="text-xs text-muted-foreground">SKU: {produto.sku}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                )}
+
                 
                 {formData.preco_promocional && (
                   <div className="flex justify-between">
